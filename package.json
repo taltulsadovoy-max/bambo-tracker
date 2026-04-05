@@ -7,7 +7,7 @@
     "build": "prisma generate && prisma migrate deploy && next build",
     "postdeploy": "tsx prisma/seed.ts",
     "start": "next start",
-    "seed": "tsx prisma/seed.ts"
+    "seed": "tsx --env-file=.env prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.6.0",
