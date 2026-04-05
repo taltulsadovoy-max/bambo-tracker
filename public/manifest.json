@@ -1,0 +1,15 @@
+{
+  "name": "טיולי הכלב",
+  "short_name": "טיולים",
+  "description": "מעקב טיולים והאכלה לכלב המשפחה",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#fff7ed",
+  "theme_color": "#f97316",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any"
+    }
+  ]
+}

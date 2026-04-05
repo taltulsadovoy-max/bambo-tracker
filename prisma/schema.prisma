@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  username      String    @unique
+  passwordHash  String
+  displayName   String
+  isAdmin       Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+
+  walks             Walk[]
+  feedings          Feeding[]
+  pushSubscriptions PushSubscription[]
+}
+
+model Walk {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id])
+  departureTime   DateTime
+  returnTime      DateTime
+  durationMinutes Int
+  didPee          Boolean   @default(false)
+  didPoop         Boolean   @default(false)
+  playedWithDogs  Boolean   @default(false)
+  playedNicely    Boolean?
+  notes           String?
+  createdAt       DateTime  @default(now())
+}
+
+model Feeding {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  fedAt     DateTime
+  createdAt DateTime @default(now())
+}
+
+model DogProfile {
+  id        String   @id @default(cuid())
+  name      String
+  photoUrl  String?
+  updatedAt DateTime @updatedAt
+}
+
+model AppSettings {
+  id                       String   @id @default(cuid())
+  walkAlertThresholdHours  Int      @default(4)
+  updatedAt                DateTime @updatedAt
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+}
