@@ -1,58 +1,10 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useActionState } from 'react'
+import { loginAction } from './actions'
 
 export default function LoginPage() {
-  const router = useRouter()
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-
-    try {
-      const csrfRes = await fetch('/api/auth/csrf')
-      const { csrfToken } = await csrfRes.json()
-
-      const res = await fetch('/api/auth/callback/credentials', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          username,
-          password,
-          csrfToken,
-          callbackUrl: `${window.location.origin}/dashboard`,
-        }),
-        redirect: 'follow',
-        credentials: 'include',
-      })
-
-      if (res.ok && res.url.includes('/dashboard')) {
-        window.location.href = '/dashboard'
-        return
-      }
-
-      // Try checking if we got a session cookie
-      const sessionCheck = await fetch('/api/auth/session', { credentials: 'include' })
-      const session = await sessionCheck.json()
-
-      if (session?.user) {
-        window.location.href = '/dashboard'
-        return
-      }
-
-      setError('שם משתמש או סיסמה שגויים')
-    } catch {
-      setError('שגיאה בהתחברות, נסה שוב')
-    }
-
-    setLoading(false)
-  }
+  const [error, formAction, pending] = useActionState(loginAction, null)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-400 via-orange-300 to-yellow-300 flex items-center justify-center p-4">
@@ -64,16 +16,16 @@ export default function LoginPage() {
         </div>
 
         <div className="bg-white rounded-3xl shadow-2xl p-6">
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form action={formAction} className="space-y-4">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">שם משתמש</label>
               <input
                 type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                name="username"
                 placeholder="הכנס שם משתמש"
                 required
                 autoCapitalize="none"
+                autoCorrect="off"
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400 text-gray-800"
               />
             </div>
@@ -81,8 +33,7 @@ export default function LoginPage() {
               <label className="block text-sm font-semibold text-gray-700 mb-1">סיסמה</label>
               <input
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                name="password"
                 placeholder="הכנס סיסמה"
                 required
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400 text-gray-800"
@@ -95,10 +46,10 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={pending}
               className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-bold py-4 rounded-2xl text-lg shadow-md transition-colors"
             >
-              {loading ? 'נכנס...' : 'כניסה'}
+              {pending ? 'נכנס...' : 'כניסה'}
             </button>
           </form>
 
